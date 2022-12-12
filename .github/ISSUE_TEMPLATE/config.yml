@@ -1,0 +1,13 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Share an extension idea
+    url: https://github.com/docker/extension-ideas
+    about: Have an idea for an extension? Share it with us!
+  - name: Extension SDK issues
+    url: https://github.com/docker/extensions-sdk
+    about: |
+      We use GitHub issues only to submit new extensions. For issues related to the extension SDK, please 
+      use the docker/extensions-sdk repository.
+  - name: Extension SDK documentation Issue
+    url: https://github.com/docker/docs
+    about: The documentation is hosted on the docker/docs repository.
