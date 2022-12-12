@@ -15,13 +15,24 @@ jobs:
     runs-on: macOS-latest
     if: ${{ contains(github.event.issue.labels.*.name, 'tos/accepted') }}
     steps:
+      - name: Find eventual initial comment
+        uses: peter-evans/find-comment@v2
+        id: fc
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: <!-- comment:${{ github.workflow}}-started -->
+
       - name: Add initial comment
         id: initial-comment
         uses: peter-evans/create-or-update-comment@v2
         with:
+          comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.issue.number }}
           body: |
+            <!-- comment:${{ github.workflow}}-started -->
             [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) workflow has started.
+          edit-mode: replace
 
       - name: Get Date
         id: get-date
