@@ -4,6 +4,7 @@ on:
   issues:
     types:
       - labeled
+      - unlabeled
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.issue.number }}
@@ -11,8 +12,8 @@ concurrency:
 
 jobs:
   validate:
-    if: ${{ contains(github.event.issue.labels.*.name, 'tos/accepted') }}
     runs-on: macOS-latest
+    if: ${{ contains(github.event.issue.labels.*.name, 'tos/accepted') }}
     steps:
       - name: Add initial comment
         id: initial-comment
