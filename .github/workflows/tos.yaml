@@ -1,0 +1,81 @@
+name: TOS Check
+
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+      - edited
+
+jobs:
+  check:
+    if: ${{ github.event.issue.labels.*.name != 'tos/accepted' }}
+    name: Ensure Terms of Service are accepted
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Add initial comment
+        id: initial-comment
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) workflow has started.
+
+      - name: Parse issue body
+        id: parse
+        uses: zentered/issue-forms-body-parser@v1.5.1
+
+      - name: Find TOS checkbox state
+        id: tos
+        run: |
+          echo "tos=$(echo '${{ steps.parse.outputs.data }}' | jq -r '.["terms-of-services"].list[0].checked' )" >> $GITHUB_OUTPUT
+
+      - name: Add comment if tos not found
+        if: ${{ steps.tos.outputs.tos != false && steps.tos.outputs.tos != true }}
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          edit-mode: replace
+          issue-number: ${{ github.event.issue.number }}
+          comment-id: ${{ steps.initial-comment.outputs.comment-id }}
+          body: |
+            :no_entry_sign: Can't find the checkbox for the terms of service. Please add it to the issue body.
+
+            See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
+      - name: Add Comment if tos not accepted
+        if: ${{ steps.tos.outputs.tos == 'false' }}
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          edit-mode: replace
+          issue-number: ${{ github.event.issue.number }}
+          comment-id: ${{ steps.initial-comment.outputs.comment-id }}
+          body: |
+            :x: Terms of Service not accepted yet
+
+            See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
+      - name: Add 'tos/accepted' label
+        if: ${{ steps.tos.outputs.tos == 'true' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ["tos/accepted"]
+            })
+
+      - name: Add Comment if tos accepted
+        if: ${{ steps.tos.outputs.tos == 'true' }}
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          edit-mode: replace
+          issue-number: ${{ github.event.issue.number }}
+          comment-id: ${{ steps.initial-comment.outputs.comment-id }}
+          body: |
+            :white_check_mark: Terms of Service accepted
+
+            See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).

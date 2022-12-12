@@ -27,9 +27,9 @@ body:
     validations:
       required: true
   - type: checkboxes
-    id: tos-agreement
     attributes:
-      label: To submit your extension you need to accept our term of services
+      label: Terms of services
+      description: To submit your extension you need to accept our term of services
       options:
         - label: I accept the [term of services](https://www.docker.com/legal/extensions_marketplace_developer_agreement/)
     validations:
