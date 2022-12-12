@@ -1,0 +1,20 @@
+{
+  "docker-hub-repository-name": {
+    "title": "Docker Hub repository name",
+    "content": [
+      "docker/resource-usage"
+    ],
+    "text": "docker/resource-usage"
+  },
+  "terms-of-services": {
+    "title": "To submit your extension you need to accept our term of services",
+    "content": [],
+    "text": "*   [ ] I accept the [term of services](https://www.docker.com/legal/extensions_marketplace_developer_agreement/)",
+    "list": [
+      {
+        "checked": false,
+        "text": "I accept the term of services"
+      }
+    ]
+  }
+}

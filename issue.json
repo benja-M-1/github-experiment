@@ -1,0 +1,6 @@
+{
+  "action": "opened",
+  "issue": {
+    "body": "### terms of services\n\n- [x] I accept the [term of services](https://www.docker.com/legal/extensions_marketplace_developer_agreement/)"
+  }
+}
