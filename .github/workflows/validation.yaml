@@ -110,7 +110,7 @@ jobs:
       - name: Validate extension
         id: validate
         run: |
-          echo output=$(docker extension validate ${{ steps.parse-repository.outputs.repository }}) << $GITHUB_OUTPUT
+          echo output=$(docker extension validate ${{ steps.parse-repository.outputs.repository }}) >> $GITHUB_OUTPUT
 
       - name: Add Comment if validation succeeded
         if: ${{ contains(steps.validate.outputs.output, 'passes the validation checks.') }}
