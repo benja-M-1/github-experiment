@@ -7,6 +7,10 @@ on:
       - reopened
       - edited
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 jobs:
   check:
     if: ${{ github.event.issue.labels.*.name != 'tos/accepted' }}
@@ -42,7 +46,7 @@ jobs:
           body: |
             :no_entry_sign: Can't find the checkbox for the terms of service. Please add it to the issue body.
 
-            See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+            See [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
       - name: Add Comment if tos not accepted
         if: ${{ steps.tos.outputs.tos == 'false' }}
