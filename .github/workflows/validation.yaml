@@ -10,6 +10,14 @@ jobs:
     if: ${{ github.event.label.name == 'tos/accepted' }}
     runs-on: macOS-latest
     steps:
+      - name: Add initial comment
+        id: initial-comment
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) workflow has started.
+
       - name: Get Date
         id: get-date
         run: |
@@ -95,5 +103,32 @@ jobs:
           echo "image=$(echo '${{ steps.parse.outputs.data }}' | jq -r '.["docker-hub-repository-name"].text' )" >> $GITHUB_OUTPUT
 
       - name: Validate extension
+        id: validate
         run: |
-          docker extension validate ${{ steps.parse-repository.outputs.repository }}
+          echo output=$(docker extension validate ${{ steps.parse-repository.outputs.repository }}) << $GITHUB_OUTPUT
+
+      - name: Add Comment if failed
+        if: ${{ failure() }}
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          edit-mode: replace
+          issue-number: ${{ github.event.issue.number }}
+          comment-id: ${{ steps.initial-comment.outputs.comment-id }}
+          body: |
+            :x: Validation failed with the following errors
+
+            ${{ steps.validate.outputs.output }}
+
+            See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
+      - name: Add Comment if tos not accepted
+        if: ${{ success() }}
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          edit-mode: replace
+          issue-number: ${{ github.event.issue.number }}
+          comment-id: ${{ steps.initial-comment.outputs.comment-id }}
+          body: |
+            :white_check_mark: Validation ended successfully
+
+            See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
