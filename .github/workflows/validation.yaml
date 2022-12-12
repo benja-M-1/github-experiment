@@ -108,8 +108,37 @@ jobs:
         run: |
           echo output=$(docker extension validate ${{ steps.parse-repository.outputs.repository }}) << $GITHUB_OUTPUT
 
+      - name: Add Comment if validation succeeded
+        if: ${{ contains(steps.validate.outputs.output, 'passes the validation checks.') }}
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          edit-mode: replace
+          issue-number: ${{ github.event.issue.number }}
+          comment-id: ${{ steps.initial-comment.outputs.comment-id }}
+          body: |
+            :white_check_mark: Validation ended successfully
+
+            ```
+            ${{ steps.validate.outputs.output }}
+            ```
+
+            See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
+
+      - name: Add 'validation/succeed' label
+        if: ${{ contains(steps.validate.outputs.output, 'passes the validation checks.') }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ["tos/accepted"]
+            })
+
       - name: Add Comment if failed
-        if: ${{ failure() }}
+        if: ${{ contains(steps.validate.outputs.output, 'passes the validation checks.') == false }}
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
@@ -118,18 +147,8 @@ jobs:
           body: |
             :x: Validation failed with the following errors
 
+            ```
             ${{ steps.validate.outputs.output }}
-
-            See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
-
-      - name: Add Comment if tos not accepted
-        if: ${{ success() }}
-        uses: peter-evans/create-or-update-comment@v2
-        with:
-          edit-mode: replace
-          issue-number: ${{ github.event.issue.number }}
-          comment-id: ${{ steps.initial-comment.outputs.comment-id }}
-          body: |
-            :white_check_mark: Validation ended successfully
+            ```
 
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
