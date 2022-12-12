@@ -7,7 +7,7 @@ on:
 
 jobs:
   validate:
-    if: ${{ github.event.label.name == 'tos/accepted' }}
+    if: ${{ contains(github.event.issue.labels.*.name, 'tos/accepted') }}
     runs-on: macOS-latest
     steps:
       - name: Add initial comment
