@@ -5,6 +5,10 @@ on:
     types:
       - labeled
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     if: ${{ contains(github.event.issue.labels.*.name, 'tos/accepted') }}
