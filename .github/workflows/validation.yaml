@@ -57,7 +57,8 @@ jobs:
           sudo cp ./cache/desktopInstallSettings/* "/Library/Application Support/com.docker.docker/"
           echo "/Library/Application Support/com.docker.docker/"
           ls "/Library/Application Support/com.docker.docker/"
-      - name: Install Docker Desktop dmg
+
+      - name: Fetch and install Docker Desktop dmg
         if: steps.cache-docker-desktop-install-settings.outputs.cache-hit != 'true'
         run: |
           sw_vers
@@ -77,7 +78,7 @@ jobs:
           /usr/bin/hdiutil detach ./mount/desktop
           echo "dmg unmounted"
 
-      - name: Install Docker Desktop app
+      - name: Start Docker Desktop
         timeout-minutes: 5
         run: |
           sudo /Applications/Docker.app/Contents/MacOS/install config --user runner
