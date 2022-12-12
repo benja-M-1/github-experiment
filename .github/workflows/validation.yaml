@@ -100,7 +100,7 @@ jobs:
       - name: Find extension repository
         id: parse-repository
         run: |
-          echo "image=$(echo '${{ steps.parse.outputs.data }}' | jq -r '.["docker-hub-repository-name"].text' )" >> $GITHUB_OUTPUT
+          echo "repository=$(echo '${{ steps.parse.outputs.data }}' | jq -r '.["docker-hub-repository-name"].text' )" >> $GITHUB_OUTPUT
 
       - name: Validate extension
         id: validate
