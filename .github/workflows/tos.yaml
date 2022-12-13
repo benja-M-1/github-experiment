@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   check:
-    if: ${{ github.event.issue.labels.*.name != 'tos/accepted' }}
+    if: contains(github.event.issue.labels.*.name, 'tos/accepted') == false
     name: Ensure Terms of Service are accepted
     runs-on: ubuntu-latest
     permissions:
@@ -37,7 +37,7 @@ jobs:
           echo "tos=$(echo '${{ steps.parse.outputs.data }}' | jq -r '.["terms-of-services"].list[0].checked' )" >> $GITHUB_OUTPUT
 
       - name: Add comment if tos not found
-        if: ${{ steps.tos.outputs.tos != false && steps.tos.outputs.tos != true }}
+        if: steps.tos.outputs.tos != false && steps.tos.outputs.tos != true
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
@@ -49,7 +49,7 @@ jobs:
             See [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
       - name: Add Comment if tos not accepted
-        if: ${{ steps.tos.outputs.tos == 'false' }}
+        if: steps.tos.outputs.tos == 'false'
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
@@ -61,7 +61,7 @@ jobs:
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
       - name: Add 'tos/accepted' label
-        if: ${{ steps.tos.outputs.tos == 'true' }}
+        if: steps.tos.outputs.tos == 'true'
         uses: actions/github-script@v6
         with:
           script: |
@@ -73,7 +73,7 @@ jobs:
             })
 
       - name: Add Comment if tos accepted
-        if: ${{ steps.tos.outputs.tos == 'true' }}
+        if: steps.tos.outputs.tos == 'true'
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
