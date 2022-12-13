@@ -126,10 +126,10 @@ jobs:
           echo 'VALIDATION_OUTPUT<<EOF' >> $GITHUB_ENV
           docker extension validate ${{ steps.parse-repository.outputs.repository }} >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
-          echo 'output=$VALIDATION_OUTPUT' >> $GITHUB_OUTPUT
+
 
       - name: Add Comment if validation succeeded
-        if: ${{ contains(steps.validate.outputs.output, 'passes the validation checks.') }}
+        if: ${{ contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') }}
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
@@ -138,13 +138,13 @@ jobs:
           body: |
             :white_check_mark: Validation ended successfully
 
-            > ${{ steps.validate.outputs.output }}
+            > ${{ env.VALIDATION_OUTPUT }}
 
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
 
       - name: Add 'validation/succeed' label
-        if: ${{ contains(steps.validate.outputs.output, 'passes the validation checks.') }}
+        if: ${{ contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') }}
         uses: actions/github-script@v6
         with:
           script: |
@@ -156,7 +156,7 @@ jobs:
             })
 
       - name: Add Comment if failed
-        if: ${{ contains(steps.validate.outputs.output, 'passes the validation checks.') == false }}
+        if: ${{ contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') == false }}
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
@@ -165,6 +165,6 @@ jobs:
           body: |
             :x: Validation failed with the following errors
 
-            > ${{ steps.validate.outputs.output }}
+            > ${{ env.VALIDATION_OUTPUT }}
 
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
