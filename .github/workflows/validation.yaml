@@ -12,7 +12,7 @@ env:
   GH_REPO: ${{ github.repository }}
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  group: validation-${{ github.event.issue.number }}
   cancel-in-progress: true
 
 jobs:
@@ -62,7 +62,7 @@ jobs:
       - name: Get Date
         id: get-date
         run: |
-          echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
+          echo "date=$(/bin/date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
         shell: bash
 
       - name: Redirect api.segment.io to localhost
@@ -146,6 +146,7 @@ jobs:
 
       - name: Validate extension
         id: validate
+        continue-on-error: true
         run: |
           touch output.txt
           docker extension validate ${{ steps.parse-repository.outputs.repository }} &> output.txt
@@ -176,14 +177,14 @@ jobs:
       - name: Add 'validation/succeeded' label
         if: contains(env.VALIDATION_OUTPUT, 'passes the validation checks.')
         run: |
-          gh issue ${{ github.even.issue.number }} --remove-label "validation/failed"
-          gh issue ${{ github.even.issue.number }} --add-label "validation/succeeded"
+          gh issue edit ${{ github.even.issue.number }} --remove-label "validation/failed"
+          gh issue edit ${{ github.even.issue.number }} --add-label "validation/succeeded"
 
       - name: Remove 'validation/succeeded' label
         if: contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') == false
         run: |
-          gh issue ${{ github.even.issue.number }} --remove-label "validation/succeeded"
-          gh issue ${{ github.even.issue.number }} --add-label "validation/failed"
+          gh issue edit ${{ github.even.issue.number }} --remove-label "validation/succeeded"
+          gh issue edit ${{ github.even.issue.number }} --add-label "validation/failed"
 
       - name: Add Comment if validation failed
         if: contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') == false
@@ -213,7 +214,11 @@ jobs:
             ---
             See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
 
+      - if: failure() || success()
+        run: echo "${{ env.VALIDATION_OUTPUT }}"
+
       - name: Setup tmate session
         if: failure() || success()
         uses: mxschmitt/action-tmate@v3
         timeout-minutes: 10
+
