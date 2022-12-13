@@ -13,7 +13,6 @@ concurrency:
 
 jobs:
   check:
-    if: contains(github.event.issue.labels.*.name, 'tos/accepted') == false
     name: Ensure Terms of Service are accepted
     runs-on: ubuntu-latest
     permissions:
@@ -59,6 +58,20 @@ jobs:
             :x: Terms of Service not accepted yet
 
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
+      - name: Remove 'tos/accepted' label if tos not accepted
+        if: |
+          steps.tos.outputs.tos == 'false'
+          && contains(github.event.issue.labels.*.name, 'tos/accepted')
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.removeLabel({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: "tos/accepted"
+            })
 
       - name: Add 'tos/accepted' label
         if: steps.tos.outputs.tos == 'true'
