@@ -125,7 +125,7 @@ jobs:
         continue-on-error: true
         run: |
           echo 'VALIDATION_OUTPUT<<EOF' >> $GITHUB_ENV
-          docker extension validate ${{ steps.parse-repository.outputs.repository }} >> $GITHUB_ENV
+          echo "$(docker extension validate ${{ steps.parse-repository.outputs.repository }})" >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
 
 
