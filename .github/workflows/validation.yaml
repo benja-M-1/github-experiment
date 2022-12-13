@@ -5,6 +5,7 @@ on:
     types:
       - labeled
       - unlabeled
+  workflow_call:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.issue.number }}

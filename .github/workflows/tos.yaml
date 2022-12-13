@@ -73,3 +73,7 @@ jobs:
             :no_entry_sign: Can't find the checkbox for the terms of service. Please add it to the issue body.
 
             See [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
+  validate:
+    needs: check
+    uses: ./.github/workflows/validation.yaml
