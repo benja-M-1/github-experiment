@@ -75,5 +75,6 @@ jobs:
             See [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
   validate:
+    name: Extension validation
     needs: check
     uses: ./.github/workflows/validation.yaml

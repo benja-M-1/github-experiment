@@ -7,16 +7,33 @@ on:
       - unlabeled
   workflow_call:
 
+env:
+  GH_TOKEN: ${{ github.token }}
+  GH_REPO: ${{ github.repository }}
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.issue.number }}
   cancel-in-progress: true
 
 jobs:
+  pre:
+    runs-on: ubuntu-latest
+    outputs:
+      tos_accepted: ${{ steps.checks.outputs.tos_accepted }}
+      already_validated: ${{ steps.checks.outputs.already_validated }}
+    steps:
+      - id: checks
+        run: |
+          labels=$(gh issue view ${{ github.event.issue.number }} --json labels --jq '[.labels[].name]')
+          echo "tos_accepted=$(echo $labels | jq '. | index("tos/accepted") != null' )" >> $GITHUB_OUTPUT
+          echo "already_validated=$(echo $labels | jq '. | index("validation/succeeded") != null' )" >> $GITHUB_OUTPUT
+
   validate:
     runs-on: macOS-latest
+    needs: pre
     if: |
-      contains(github.event.issue.labels.*.name, 'tos/accepted')
-      && contains(github.event.issue.labels.*.name, 'validation/succeeded') == false
+      needs.pre.outputs.tos_accepted == 'true'
+      && needs.pre.outputs.already_validated == 'false'
     steps:
       - name: Find eventual initial comment
         uses: peter-evans/find-comment@v2.1.0
@@ -133,7 +150,7 @@ jobs:
           echo 'EOF' >> $GITHUB_ENV
 
       - name: Add Comment if validation succeeded
-        if: ${{ contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') }}
+        if: contains(env.VALIDATION_OUTPUT, 'passes the validation checks.')
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
@@ -147,19 +164,19 @@ jobs:
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
       - name: Add 'validation/succeeded' label
-        if: ${{ contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') }}
-        uses: actions/github-script@v6
-        with:
-          script: |
-            github.rest.issues.addLabels({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: ["validation/succeeded"]
-            })
+        if: contains(env.VALIDATION_OUTPUT, 'passes the validation checks.')
+        run: |
+          gh issue ${{ github.even.issue.number }} --remove-label "validation/failed"
+          gh issue ${{ github.even.issue.number }} --add-label "validation/succeeded"
+
+      - name: Remove 'validation/succeeded' label
+        if: contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') == false
+        run: |
+          gh issue ${{ github.even.issue.number }} --remove-label "validation/succeeded"
+          gh issue ${{ github.even.issue.number }} --add-label "validation/failed"
 
       - name: Add Comment if validation failed
-        if: ${{ contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') == false }}
+        if: contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') == false
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
@@ -173,7 +190,7 @@ jobs:
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
       - name: Add Comment if job failed
-        if: ${{ failure() }}
+        if: failure()
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
@@ -185,6 +202,6 @@ jobs:
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
       - name: Setup tmate session
-        if: ${{ failure() || success() }}
+        if: failure() || success()
         uses: mxschmitt/action-tmate@v3
         timeout-minutes: 10
