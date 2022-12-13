@@ -17,6 +17,7 @@ concurrency:
 
 jobs:
   pre:
+    name: Prepare validation
     runs-on: ubuntu-latest
     outputs:
       tos_accepted: ${{ steps.checks.outputs.tos_accepted }}
@@ -29,6 +30,7 @@ jobs:
           echo "already_validated=$(echo $labels | jq '. | index("validation/succeeded") != null' )" >> $GITHUB_OUTPUT
 
   validate:
+    name: Validate extension
     runs-on: macOS-latest
     needs: pre
     if: |
@@ -52,8 +54,10 @@ jobs:
           comment-id: ${{ steps.fc.outputs.comment-id }}
           issue-number: ${{ github.event.issue.number }}
           body: |
-            [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) workflow has started.
-          edit-mode: replace
+            Validation started, it will take some time :hourglass_flowing_sand:
+            
+            See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{github.run_id }}) for
+            more details.
 
       - name: Get Date
         id: get-date
@@ -166,6 +170,7 @@ jobs:
 
             > ${{ env.VALIDATION_OUTPUT }}
 
+            ---
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
       - name: Add 'validation/succeeded' label
@@ -192,7 +197,8 @@ jobs:
 
             > ${{ env.VALIDATION_OUTPUT }}
 
-            See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+            ---
+            See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
 
       - name: Add Comment if job failed
         if: failure()
@@ -204,7 +210,8 @@ jobs:
           body: |
             :x: There was a problem during the validation job
 
-            See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+            ---
+            See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
 
       - name: Setup tmate session
         if: failure() || success()
