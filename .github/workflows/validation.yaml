@@ -124,7 +124,6 @@ jobs:
 
       - name: Validate extension
         id: validate
-        continue-on-error: true
         run: |
           touch output.txt
           docker extension validate ${{ steps.parse-repository.outputs.repository }} &> output.txt
@@ -145,7 +144,6 @@ jobs:
             > ${{ env.VALIDATION_OUTPUT }}
 
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
-
 
       - name: Add 'validation/succeed' label
         if: ${{ contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') }}
@@ -187,4 +185,4 @@ jobs:
 
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 60
+        timeout-minutes: 10
