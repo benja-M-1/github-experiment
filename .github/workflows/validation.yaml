@@ -145,7 +145,7 @@ jobs:
 
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
-      - name: Add 'validation/succeed' label
+      - name: Add 'validation/succeeded' label
         if: ${{ contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') }}
         uses: actions/github-script@v6
         with:
@@ -154,7 +154,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              labels: ["tos/accepted"]
+              labels: ["validation/succeeded"]
             })
 
       - name: Add Comment if validation failed
