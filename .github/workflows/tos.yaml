@@ -21,26 +21,28 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
+    outputs:
+        accepted: ${{ steps.are_tos_accepted.outputs.accepted }}
     steps:
       - name: Parse issue body
         id: parse
         uses: zentered/issue-forms-body-parser@v1.5.1
 
       - name: Find TOS checkbox state
-        id: tos
+        id: are_tos_accepted
         run: |
-          echo "tos=$(echo '${{ steps.parse.outputs.data }}' | jq -r '.["terms-of-services"].list[0].checked' )" >> $GITHUB_OUTPUT
+          echo "accepted=$(echo '${{ steps.parse.outputs.data }}' | jq -r '.["terms-of-services"].list[0].checked' )" >> $GITHUB_OUTPUT
 
       - name: Remove 'tos/accepted' label
-        if: steps.tos.outputs.tos == 'false'
+        if: steps.are_tos_accepted.outputs.accepted == 'false'
         run: gh issue edit ${{ github.event.issue.number }} --remove-label tos/accepted
 
       - name: Add 'tos/accepted' label
-        if: steps.tos.outputs.tos == 'true'
+        if: steps.are_tos_accepted.outputs.accepted == 'true'
         run: gh issue edit ${{ github.event.issue.number }} --add-label tos/accepted
 
       - name: Add Comment if tos not accepted
-        if: steps.tos.outputs.tos == 'false'
+        if: steps.are_tos_accepted.outputs.accepted == 'false'
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
@@ -51,7 +53,7 @@ jobs:
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
       - name: Add Comment if tos accepted
-        if: steps.tos.outputs.tos == 'true'
+        if: steps.are_tos_accepted.outputs.accepted == 'true'
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
@@ -62,7 +64,7 @@ jobs:
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
       - name: Add comment if tos not found
-        if: steps.tos.outputs.tos == 'null'
+        if: steps.are_tos_accepted.outputs.accepted == 'null'
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
