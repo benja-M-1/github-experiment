@@ -145,6 +145,11 @@ jobs:
         run: |
           touch output.txt
           docker extension validate ${{ steps.parse-repository.outputs.repository }} &> output.txt
+          
+          echo "\n"
+          cat output.txt
+          echo "\n"
+          
           echo 'VALIDATION_OUTPUT<<EOF' >> $GITHUB_ENV
           cat output.txt >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
