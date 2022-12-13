@@ -13,9 +13,9 @@ concurrency:
 jobs:
   validate:
     runs-on: macOS-latest
-#    if: |
-#      contains(github.event.issue.labels.*.name, 'tos/accepted')
-#      && contains(github.event.issue.labels.*.name, 'validation/succeeded') == false
+    if: |
+      contains(github.event.issue.labels.*.name, 'tos/accepted')
+      && contains(github.event.issue.labels.*.name, 'validation/succeeded') == false
     steps:
       - name: Find eventual initial comment
         uses: peter-evans/find-comment@v2.1.0
@@ -127,12 +127,10 @@ jobs:
         run: |
           touch output.txt
           docker extension validate ${{ steps.parse-repository.outputs.repository }} &> output.txt
-          echo 'VALIDATION_OUTPUT<<EOF' >> $GITHUB_ENV
-          cat output.txt >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
+          echo "output=`cat output.txt`" >> $GITHUB_OUTPUT
 
       - name: Add Comment if validation succeeded
-        if: ${{ contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') }}
+        if: ${{ contains(steps.validation.outputs.output, 'passes the validation checks.') }}
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
@@ -141,12 +139,12 @@ jobs:
           body: |
             :white_check_mark: Validation ended successfully
 
-            > ${{ env.VALIDATION_OUTPUT }}
+            > ${{ steps.validation.outputs.output }}
 
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
       - name: Add 'validation/succeeded' label
-        if: ${{ contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') }}
+        if: ${{ contains(steps.validation.outputs.output, 'passes the validation checks.') }}
         uses: actions/github-script@v6
         with:
           script: |
@@ -158,7 +156,7 @@ jobs:
             })
 
       - name: Add Comment if validation failed
-        if: ${{ contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') == false }}
+        if: ${{ contains(steps.validation.outputs.output, 'passes the validation checks.') == false }}
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
@@ -167,7 +165,7 @@ jobs:
           body: |
             :x: Validation failed with the following errors
 
-            > ${{ env.VALIDATION_OUTPUT }}
+            > ${{ steps.validation.outputs.output }}
 
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
