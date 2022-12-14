@@ -11,10 +11,6 @@ env:
   GH_TOKEN: ${{ github.token }}
   GH_REPO: ${{ github.repository }}
 
-concurrency:
-  group: tos-${{ github.event.issue.number }}
-  cancel-in-progress: true
-
 jobs:
   check:
     name: Ensure Terms of Service are accepted

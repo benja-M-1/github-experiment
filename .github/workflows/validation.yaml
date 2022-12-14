@@ -11,10 +11,6 @@ env:
   GH_TOKEN: ${{ github.token }}
   GH_REPO: ${{ github.repository }}
 
-concurrency:
-  group: validation-${{ github.event.issue.number }}
-  cancel-in-progress: true
-
 jobs:
   pre:
     name: Prepare validation
