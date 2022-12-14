@@ -151,7 +151,9 @@ jobs:
           cat output.txt
           echo "\n"
           
-          echo "validation_output=$(cat output.txt)" >> $GITHUB_OUTPUT
+          echo 'VALIDATION_OUTPUT<<EOF' >> $GITHUB_ENV
+          cat output.txt >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
 
       - name: Add Comment if validation succeeded
         if: steps.validate.outcome == 'success'
@@ -163,7 +165,7 @@ jobs:
           body: |
             :white_check_mark: Validation ended successfully
 
-            > ${{ steps.validate.outputs.validation_output }}
+            > ${{ env.VALIDATION_OUTPUT }}
 
             ---
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
@@ -190,7 +192,7 @@ jobs:
           body: |
             :x: Validation failed with the following errors
 
-            > ${{ steps.validate.outputs.validation_output }}
+            > ${{ env.VALIDATION_OUTPUT }}
 
             ---
             See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
@@ -209,7 +211,7 @@ jobs:
             See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
 
       - if: failure() || success()
-        run: echo "${{ steps.validate.outputs.validation_output }}"
+        run: echo "${{ env.VALIDATION_OUTPUT }}"
 
       - name: Setup tmate session
         if: failure() || success()
