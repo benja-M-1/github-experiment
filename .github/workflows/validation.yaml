@@ -38,7 +38,7 @@ jobs:
         id: fc
         continue-on-error: true
         with:
-          issue-number: ${{ github.event.pull_request.number }}
+          issue-number: ${{ github.event.issue.number }}
           comment-author: 'github-actions[bot]'
           body-includes: ${{ github.workflow}} workflow has started
           direction: last
@@ -52,8 +52,8 @@ jobs:
           body: |
             Validation started, it will take some time :hourglass_flowing_sand:
             
-            See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{github.run_id }}) for
-            more details.
+            ---
+            See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{github.run_id }}) for more details.
 
       - name: Get Date
         id: get-date
@@ -171,14 +171,14 @@ jobs:
       - name: Add 'validation/succeeded' label
         if: steps.validate.outcome == 'success'
         run: |
-          gh issue edit ${{ github.even.issue.number }} --remove-label "validation/failed"
-          gh issue edit ${{ github.even.issue.number }} --add-label "validation/succeeded"
+          gh issue edit ${{ github.event.issue.number }} --remove-label "validation/failed"
+          gh issue edit ${{ github.event.issue.number }} --add-label "validation/succeeded"
 
       - name: Remove 'validation/succeeded' label
         if: steps.validate.outcome != 'success'
         run: |
-          gh issue edit ${{ github.even.issue.number }} --remove-label "validation/succeeded"
-          gh issue edit ${{ github.even.issue.number }} --add-label "validation/failed"
+          gh issue edit ${{ github.event.issue.number }} --remove-label "validation/succeeded"
+          gh issue edit ${{ github.event.issue.number }} --add-label "validation/failed"
 
       - name: Add Comment if validation failed
         if: steps.validate.outcome != 'success'
