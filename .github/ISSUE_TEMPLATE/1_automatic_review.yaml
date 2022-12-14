@@ -20,7 +20,6 @@ body:
         :confused: If there are some issues, we will add the problems as comment and close the issue. Once you have fixed all the problems,
         re-open the issue and the process will start over.
   - type: input
-    id: repository
     attributes:
       label: Docker Hub repository name
       description: Provide the Docker Hub repository name for your extension so that we can install it

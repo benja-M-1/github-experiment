@@ -19,7 +19,6 @@ body:
         We will send you our feedback via email. After the review process is done, we will add the `review/ok` which will trigger an automatic
         job to publish the extension on the marketplace.
   - type: input
-    id: repository
     attributes:
       label: Docker Hub repository name
       description: Provide the Docker Hub repository name for your extension so that we can install it
