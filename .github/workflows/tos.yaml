@@ -76,4 +76,5 @@ jobs:
   validate:
     name: Extension validation
     needs: check
+    if: needs.check.outputs.accepted == 'true'
     uses: ./.github/workflows/validation.yaml
