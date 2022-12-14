@@ -126,7 +126,7 @@ jobs:
           echo "Docker starting..."
 
       - name: Wait for Docker to be up and running
-        timeout-minutes: 7
+        timeout-minutes: 10
         run: |
           until docker ps; do echo "ps failed, sleep 10 s and try again"; sleep 10; done
           echo "Docker started and ready"
