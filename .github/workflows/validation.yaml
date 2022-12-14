@@ -146,26 +146,15 @@ jobs:
         run: |
           touch output.txt
           docker extension validate -a -s -i ${{ steps.parse-repository.outputs.repository }} &> output.txt
-          
-          echo "\n"
-          cat output.txt
-          echo "\n"
-          
+
+      - name: Read validation output
+        if: steps.validate.outcome != 'success'
+        run: |          
           delimiter=$(uuidgen)
           
           echo "VALIDATION_OUTPUT<<$delimiter" >> $GITHUB_ENV
           cat output.txt >> $GITHUB_ENV
           echo "$delimiter" >> $GITHUB_ENV
-  
-          touch foo.txt
-          echo "Hello foo" >> foo.txt 
-          echo "FOO<<$delimiter" >> $GITHUB_ENV
-          cat foo.txt >> $GITHUB_ENV
-          echo "$delimiter" >> $GITHUB_ENV
-
-          echo "BAR<<EOF" >> $GITHUB_ENV
-          echo "Hello bar" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV      
 
       - name: Add Comment if validation succeeded
         if: steps.validate.outcome == 'success'
@@ -177,10 +166,8 @@ jobs:
           body: |
             :white_check_mark: Validation ended successfully
 
-            > ${{ env.VALIDATION_OUTPUT }}
-
             ---
-            See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+            See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
 
       - name: Add 'validation/succeeded' label
         if: steps.validate.outcome == 'success'
@@ -221,12 +208,3 @@ jobs:
 
             ---
             See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
-
-      - if: failure() || success()
-        run: echo "${{ env.VALIDATION_OUTPUT }}"
-
-      - name: Setup tmate session
-        if: failure() || success()
-        uses: mxschmitt/action-tmate@v3
-        timeout-minutes: 10
-
