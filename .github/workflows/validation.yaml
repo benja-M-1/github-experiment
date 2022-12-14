@@ -145,7 +145,7 @@ jobs:
         continue-on-error: true
         run: |
           touch output.txt
-          docker extension validate ${{ steps.parse-repository.outputs.repository }} &> output.txt
+          docker extension validate -a ${{ steps.parse-repository.outputs.repository }} &> output.txt
           
           echo "\n"
           cat output.txt
