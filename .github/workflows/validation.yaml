@@ -145,18 +145,16 @@ jobs:
         continue-on-error: true
         run: |
           touch output.txt
-          docker extension validate -a ${{ steps.parse-repository.outputs.repository }} &> output.txt
+          docker extension validate -a -s -i ${{ steps.parse-repository.outputs.repository }} &> output.txt
           
           echo "\n"
           cat output.txt
           echo "\n"
           
-          echo 'VALIDATION_OUTPUT<<EOF' >> $GITHUB_ENV
-          cat output.txt >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
+          echo "validation_output=$(cat output.txt)" >> $GITHUB_OUTPUT
 
       - name: Add Comment if validation succeeded
-        if: contains(env.VALIDATION_OUTPUT, 'passes the validation checks.')
+        if: steps.validate.outcome == 'success'
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
@@ -165,25 +163,25 @@ jobs:
           body: |
             :white_check_mark: Validation ended successfully
 
-            > ${{ env.VALIDATION_OUTPUT }}
+            > ${{ steps.validate.outputs.validation_output }}
 
             ---
             See [${{ github.workflow}}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
 
       - name: Add 'validation/succeeded' label
-        if: contains(env.VALIDATION_OUTPUT, 'passes the validation checks.')
+        if: steps.validate.outcome == 'success'
         run: |
           gh issue edit ${{ github.even.issue.number }} --remove-label "validation/failed"
           gh issue edit ${{ github.even.issue.number }} --add-label "validation/succeeded"
 
       - name: Remove 'validation/succeeded' label
-        if: contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') == false
+        if: steps.validate.outcome != 'success'
         run: |
           gh issue edit ${{ github.even.issue.number }} --remove-label "validation/succeeded"
           gh issue edit ${{ github.even.issue.number }} --add-label "validation/failed"
 
       - name: Add Comment if validation failed
-        if: contains(env.VALIDATION_OUTPUT, 'passes the validation checks.') == false
+        if: steps.validate.outcome != 'success'
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
@@ -192,7 +190,7 @@ jobs:
           body: |
             :x: Validation failed with the following errors
 
-            > ${{ env.VALIDATION_OUTPUT }}
+            > ${{ steps.validate.outputs.validation_output }}
 
             ---
             See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
@@ -211,7 +209,7 @@ jobs:
             See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
 
       - if: failure() || success()
-        run: echo "${{ env.VALIDATION_OUTPUT }}"
+        run: echo "${{ steps.validate.outputs.validation_output }}"
 
       - name: Setup tmate session
         if: failure() || success()
