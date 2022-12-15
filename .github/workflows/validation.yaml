@@ -148,7 +148,6 @@ jobs:
           docker extension validate -a -s -i ${{ steps.parse-repository.outputs.repository }} &> output.txt
 
       - name: Read validation output
-        if: steps.validate.outcome != 'success'
         run: |          
           delimiter=$(uuidgen)
           
@@ -167,6 +166,13 @@ jobs:
             :white_check_mark: Validation ended successfully
 
             @docker/extensions ${{ steps.parse-repository.outputs.repository }} is valid :tada:
+
+            <details>
+            <summary>Click to see the validation output</summary>
+
+            > ${{ env.VALIDATION_OUTPUT }}
+            </details>
+
             ---
             See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
 
