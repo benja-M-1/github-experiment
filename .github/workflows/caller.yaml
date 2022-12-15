@@ -1,0 +1,23 @@
+on:
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: 'Issue number'
+        required: true
+      repository:
+        description: 'Repository name'
+        required: true
+
+env:
+  GH_REPO: benja-M-1/remote-repo
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  call:
+    runs-on: ubuntu-latest
+    steps:
+      - run: gh workflow list
+      - run: |
+          gh workflow run publish.yaml \
+          -f issue=${{ github.event.inputs.issue }} \
+          -f repository=${{ github.event.inputs.repository }}
