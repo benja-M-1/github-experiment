@@ -215,3 +215,7 @@ jobs:
 
             ---
             See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
+
+      - name: Mark job as failed
+        if: steps.validate.outcome != 'success'
+        run: exit 1
