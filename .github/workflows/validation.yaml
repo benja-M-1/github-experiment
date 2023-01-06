@@ -118,8 +118,8 @@ jobs:
       - name: Start Docker Desktop
         timeout-minutes: 5
         run: |
-          sudo /Applications/Docker.app/Contents/MacOS/install config --user runner
           sudo mkdir /Library/PrivilegedHelperTools
+          sudo /Applications/Docker.app/Contents/MacOS/install config --user runner
           sudo /Applications/Docker.app/Contents/MacOS/install vmnetd
           echo "app installed"
           /usr/bin/open /Applications/Docker.app --args --unattended --add-host-docker-internal-registry
