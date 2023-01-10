@@ -37,6 +37,8 @@ jobs:
         if: steps.are_tos_accepted.outputs.accepted == 'true'
         run: gh issue edit ${{ github.event.issue.number }} --add-label tos/accepted
 
+      - uses: actions/checkout@v3
+
       - name: Render template when tos are not accepted
         id: template_tos_not_accepted
         if: steps.are_tos_accepted.outputs.accepted == 'false'

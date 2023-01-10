@@ -143,6 +143,8 @@ jobs:
           cat output.txt >> $GITHUB_ENV
           echo "$delimiter" >> $GITHUB_ENV
 
+      - uses: actions/checkout@v3
+
       - name: Render template when validation succeeded
         id: template_validation_succeeded
         if: steps.validate.outcome == 'success'
