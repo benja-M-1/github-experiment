@@ -1,7 +1,6 @@
 name: Simple extension submission
 description: Submit your extension to be automatically validated and published on the marketplace.
 title: "[Submission]: "
-labels: ["submission/automatic"]
 assignees: []
 body:
   - type: markdown
@@ -33,7 +32,6 @@ body:
   - type: checkboxes
     attributes:
       label: Terms of services
-      description: To submit your extension you need to accept our term of services
       options:
         - label: I accept the [term of services](https://www.docker.com/legal/extensions_marketplace_developer_agreement/)
     validations:

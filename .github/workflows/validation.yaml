@@ -43,18 +43,6 @@ jobs:
           body-includes: ${{ github.workflow}} workflow has started
           direction: last
 
-      - name: Add initial comment
-        id: initial-comment
-        uses: peter-evans/create-or-update-comment@v2
-        with:
-          comment-id: ${{ steps.fc.outputs.comment-id }}
-          issue-number: ${{ github.event.issue.number }}
-          body: |
-            Validation started, it will take some time :hourglass_flowing_sand:
-            
-            ---
-            See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{github.run_id }}) for more details.
-
       - name: Get Date
         id: get-date
         run: |
@@ -155,26 +143,25 @@ jobs:
           cat output.txt >> $GITHUB_ENV
           echo "$delimiter" >> $GITHUB_ENV
 
+      - name: Render template when validation succeeded
+        id: template_validation_succeeded
+        if: steps.validate.outcome == 'success'
+        uses: chuhlomin/render-template@v1.6
+        with:
+          template: .github/workflows/templates/validation-succeeded.md
+          vars: |
+            extension: ${{ steps.parse-repository.outputs.repository }}
+            output: ${{ env.VALIDATION_OUTPUT }}
+            workflow_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
       - name: Add Comment if validation succeeded
         if: steps.validate.outcome == 'success'
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
           issue-number: ${{ github.event.issue.number }}
-          comment-id: ${{ steps.initial-comment.outputs.comment-id }}
-          body: |
-            :white_check_mark: Validation ended successfully
-
-            @docker/extensions ${{ steps.parse-repository.outputs.repository }} is valid :tada:
-
-            <details>
-            <summary>Click to see the validation output</summary>
-
-            > ${{ env.VALIDATION_OUTPUT }}
-            </details>
-
-            ---
-            See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          body: ${{ steps.template_validation_succeeded.outputs.rendered }}
 
       - name: Add 'validation/succeeded' label
         if: steps.validate.outcome == 'success'
@@ -188,20 +175,33 @@ jobs:
           gh issue edit ${{ github.event.issue.number }} --remove-label "validation/succeeded"
           gh issue edit ${{ github.event.issue.number }} --add-label "validation/failed"
 
+      - name: Render template when validation failed
+        id: template_validation_failed
+        if: steps.validate.outcome != 'success'
+        uses: chuhlomin/render-template@v1.6
+        with:
+          template: .github/workflows/templates/validation-failed.md
+          vars: |
+            output: ${{ env.VALIDATION_OUTPUT }}
+            workflow_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
       - name: Add Comment if validation failed
         if: steps.validate.outcome != 'success'
         uses: peter-evans/create-or-update-comment@v2
         with:
           edit-mode: replace
           issue-number: ${{ github.event.issue.number }}
-          comment-id: ${{ steps.initial-comment.outputs.comment-id }}
-          body: |
-            :x: Validation failed with the following errors
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          body: ${{ steps.template_validation_failed.outputs.rendered }}
 
-            > ${{ env.VALIDATION_OUTPUT }}
-
-            ---
-            See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
+      - name: Render template when job failed
+        id: template_validation_errored
+        if: steps.validate.outcome != 'success'
+        uses: chuhlomin/render-template@v1.6
+        with:
+          template: .github/workflows/templates/validation-errored.md
+          vars: |
+            workflow_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
       - name: Add Comment if job failed
         if: failure()
@@ -209,12 +209,8 @@ jobs:
         with:
           edit-mode: replace
           issue-number: ${{ github.event.issue.number }}
-          comment-id: ${{ steps.initial-comment.outputs.comment-id }}
-          body: |
-            :x: There was a problem during the validation job
-
-            ---
-            See [action](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
+          comment-id: ${{ steps.fc.outputs.comment-id }}
+          body: ${{ steps.template_validation_errored.outputs.rendered }}
 
       - name: Mark job as failed
         if: steps.validate.outcome != 'success'
