@@ -47,6 +47,7 @@ jobs:
           template: .github/workflows/templates/tos-not-accepted.md
           vars: |
             workflow_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            user: ${{ github.event.issue.user.login}}
 
       - name: Add Comment if tos not accepted
         if: steps.are_tos_accepted.outputs.accepted == 'false'
@@ -64,6 +65,7 @@ jobs:
           template: .github/workflows/templates/tos-accepted.md
           vars: |
             workflow_url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            user: ${{ github.event.issue.user.login}}
 
       - name: Add Comment if tos accepted
         if: steps.are_tos_accepted.outputs.accepted == 'true'

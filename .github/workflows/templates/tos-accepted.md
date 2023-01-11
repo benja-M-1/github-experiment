@@ -1,4 +1,4 @@
-:white_check_mark: @${{ github.event.issue.user.login}} has accepted the terms of service.
+:white_check_mark: @{{ .user }} has accepted the terms of service.
 
 The automatic validation for publishing your extension has started, you will see the result in a few minutes :hourglass_flowing_sand:.
 
