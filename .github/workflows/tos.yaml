@@ -56,7 +56,7 @@ jobs:
           issue-number: ${{ github.event.issue.number }}
           body: ${{ steps.template_tos_not_accepted.outputs.result }}
 
-      - name: Render template when tos are not accepted
+      - name: Render template when tos are accepted
         id: template_tos_accepted
         if: steps.are_tos_accepted.outputs.accepted == 'true'
         uses: chuhlomin/render-template@v1.6
