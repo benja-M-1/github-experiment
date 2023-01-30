@@ -139,9 +139,15 @@ jobs:
       - name: Mark job as failed
         run: exit 1
 
+  debug:
+    runs-on: ubuntu-latest
+    needs: [ parse-issue ]
+    steps:
+      - run: echo ${{ toJSON(github.event.issue) }}
+
   validate:
     concurrency:
-      group: submission-${{ github.event.issue.number || 'wtf-there-is-no-issue-number' }}-${{ fromJSON(github.event.issue) }}
+      group: submission-${{ github.event.issue.number || 'wtf-there-is-no-issue-number' }}
       cancel-in-progress: true
     name: Extension validation
     needs: parse-issue
