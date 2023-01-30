@@ -141,7 +141,7 @@ jobs:
 
   validate:
     concurrency:
-      group: submission-${{ github.event.issue.number }}
+      group: submission-${{ github.event.issue.number || 'wtf-there-is-no-issue-number' }}-${{ fromJSON(github.event.issue) }}
       cancel-in-progress: true
     name: Extension validation
     needs: parse-issue
