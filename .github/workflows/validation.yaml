@@ -204,6 +204,11 @@ jobs:
           until docker ps; do echo "ps failed, sleep 10 s and try again"; sleep 10; done
           echo "Docker started and ready"
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ failure() }}
+        timeout-minutes: 15
+
       - name: Validate extension
         id: validate
         continue-on-error: true
