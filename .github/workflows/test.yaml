@@ -8,5 +8,5 @@ jobs:
     steps:
       - run: mkdir /tmp/foo
       - run: ls -als /tmp
-      - run: docker run -v /tmp/foo:/foo -w foo alpine touch hello.txt
+      - run: docker run -v /tmp/foo:/foo -w /foo alpine touch hello.txt
       - run: ls -als /tmp/foo
